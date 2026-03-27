@@ -12,7 +12,7 @@ TagManager:
   - Water
   - UI
   - Buttons
-  - 
+  - Text
   - 
   - 
   - 
@@ -46,6 +46,9 @@ TagManager:
     locked: 0
   - name: Buttons
     uniqueID: 2927075575
+    locked: 0
+  - name: Text
+    uniqueID: 2834681049
     locked: 0
   m_RenderingLayers:
   - Default
