@@ -11,9 +11,9 @@ TagManager:
   - Background
   - Water
   - UI
+  - Panel
   - Buttons
   - Text
-  - 
   - 
   - 
   - 
@@ -49,6 +49,9 @@ TagManager:
     locked: 0
   - name: Text
     uniqueID: 2834681049
+    locked: 0
+  - name: Panel
+    uniqueID: 1254208615
     locked: 0
   m_RenderingLayers:
   - Default

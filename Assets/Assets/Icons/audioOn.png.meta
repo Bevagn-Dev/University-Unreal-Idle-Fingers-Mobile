@@ -134,10 +134,10 @@ TextureImporter:
         serializedVersion: 2
         x: 17
         y: 14
-        width: 42
+        width: 66
         height: 67
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -150,33 +150,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: audioOn_1
-      rect:
-        serializedVersion: 2
-        x: 66
-        y: 27
-        width: 17
-        height: 40
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2fb483aaef4eebd70800000000000000
-      internalID: 9060931282744658930
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 72afb8e7f3f2b8248a53add9914c8443
     internalID: 0
     vertices: []
     indices: 
