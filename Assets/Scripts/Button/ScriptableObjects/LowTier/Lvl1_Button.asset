@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4165db50ff4ab64588293be4195ebe7, type: 3}
-  m_Name: SO_ButtonValue
+  m_Name: Lvl1_Button
   m_EditorClassIdentifier: 
   type: 0
-  baseRewardAmount: 0
-  lifeTimeSeconds: 0
-  requiredHoldTime: 1
+  baseTapRewardAmount: 1
+  lifeTimeSeconds: 5
+  color: {r: 1, g: 1, b: 1, a: 1}

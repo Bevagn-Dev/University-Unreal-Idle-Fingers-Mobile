@@ -2,17 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SO_ButtonValue", menuName = "ButtonValues")]
+[CreateAssetMenu(fileName = "ButtonValues", menuName = "ButtonValues")]
 public class ButtonValues : ScriptableObject 
 {
-    public enum ButtonType { Tap, Hold}
+    public enum ButtonType { Tap, MultiTap, Slider}
     public ButtonType type;
 
-    public float baseRewardAmount;
-    public float lifeTimeSeconds;
+    [Space(10)]
 
-    [Header("Hold Settings (If applicable)")]
-    public float requiredHoldTime = 1f;
+    public float baseTapRewardAmount = 5f;
+    public float lifeTimeSeconds = 2f;
+
+    public Color color = Color.white;
+
 }
 
 
