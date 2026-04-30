@@ -1,17 +1,28 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
+using DG.Tweening;
 
-public class GameplayButton : MonoBehaviour, IPointerClickHandler
+public class GameplayButton : MonoBehaviour, IPointerDownHandler
 {
-    [Header("World Space References")]
+
+    [Header("Visuals")]
+    public float fadeDuration = 0.2f;
+
+    [Space(10)]
+
+    [Header("References")]
     public Transform shrinkingRing;
-    public SpriteRenderer mainSprite;
-    public TextMeshPro valueText;
+    public SpriteRenderer ringSpriteRenderer; 
+
+    private SpriteRenderer spriteRenderer;
+    private TMP_Text rewardText;
+    private Vector3 originalScale;
 
     private ButtonValues data;
     private float lifeTimer;
     private float maxLifeTime;
+    private bool isInteractable = true;
 
     public void Initialize(ButtonValues setupData)
     {
@@ -19,54 +30,99 @@ public class GameplayButton : MonoBehaviour, IPointerClickHandler
         maxLifeTime = data.lifeTimeSeconds;
         lifeTimer = maxLifeTime;
 
-        mainSprite.color = data.color;
-        valueText.text = data.baseTapRewardAmount.ToString();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        rewardText = GetComponentInChildren<TMP_Text>();
+        
+        originalScale = transform.localScale;
+
+        spriteRenderer.color = data.color;
+        rewardText.text = data.baseTapRewardAmount.ToString();
         
         shrinkingRing.localScale = Vector3.one * 2f; 
+        shrinkingRing.DOScale(Vector3.one, maxLifeTime).SetEase(Ease.Linear);
     }
 
-    private void Update()
+    void Update()
     {
+        if (!isInteractable) 
+        {
+            return;
+        }
+
         lifeTimer -= Time.deltaTime;
-        
-        float progress = 1f - (lifeTimer / maxLifeTime); 
-        shrinkingRing.localScale = Vector3.Lerp(Vector3.one * 2f, Vector3.one, progress);
 
         if (lifeTimer <= 0)
         {
-            GameManager.Instance.BreakCombo();
-            RemoveButton();
+            MissButton();
         }
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public void OnPointerDown(PointerEventData eventData)
     {
+        if (!isInteractable) 
+        {
+            return;
+        }
+
         ExecuteTap();
     }
 
     public void ExecuteTap() 
     {
+        isInteractable = false;
+        
+        shrinkingRing.DOKill();
+        transform.DOKill();
+
         float timingBonus = CalculateTimingBonus();
         float totalReward = data.baseTapRewardAmount * timingBonus;
 
         GameManager.Instance.AddTapCurrency(totalReward);
         GameManager.Instance.RegisterComboHit();
         
-        RemoveButton();
+
+        transform.DOScale(originalScale * 0.85f, 0.1f).SetEase(Ease.OutQuad).OnComplete(FadeOutAndDestroy);
+    }
+
+    private void MissButton()
+    {
+        isInteractable = false;
+        
+        shrinkingRing.DOKill();
+        transform.DOKill();
+
+        GameManager.Instance.BreakCombo();
+        
+        transform.DOShakeScale(0.2f, 0.2f, 5, 45).OnComplete(FadeOutAndDestroy);
+    }
+
+    private void FadeOutAndDestroy()
+    {
+        spriteRenderer.DOFade(0f, fadeDuration);
+        if (ringSpriteRenderer != null) ringSpriteRenderer.DOFade(0f, fadeDuration);
+        
+        rewardText.DOFade(0f, fadeDuration).OnComplete(() => 
+        {
+            SpawnManager.Instance.ReportButtonDestroyed();
+            Destroy(gameObject);
+        });
     }
 
     private float CalculateTimingBonus()
     {
         float progress = 1f - (lifeTimer / maxLifeTime);
-        if (progress >= 0.85f) return 2.0f; // Perfect
-        if (progress >= 0.60f) return 1.2f; // Good
-        return 1.0f; // Early
-    }
 
-    private void RemoveButton()
-    {
-        SpawnManager.Instance.ReportButtonDestroyed();
-        Destroy(gameObject);
+        if (progress >= 0.85f) 
+        {
+            return 2.0f; // Perfect
+        }
+        if (progress >= 0.60f) 
+        {
+            return 1.2f; // Good
+        }
+        else
+        {
+            return 1.0f; // Early
+        }
     }
-
 }

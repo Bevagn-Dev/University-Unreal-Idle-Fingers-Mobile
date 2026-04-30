@@ -199,7 +199,7 @@ GameObject:
   m_Component:
   - component: {fileID: 958371737676142053}
   - component: {fileID: 6635454132293010485}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -288,7 +288,7 @@ GameObject:
   - component: {fileID: 502852689634035111}
   - component: {fileID: 4470459409421314302}
   - component: {fileID: 3867135337267400014}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: TapButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -357,7 +357,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_Sprite: {fileID: 1945269359277807493, guid: 0103e43f7ab19bc489d14661a35cb9d3, type: 3}
-  m_Color: {r: 0.7904978, g: 0, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.6666667, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -415,6 +415,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c20ec8f5d3ecc49408e4af3475dd4619, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fadeDuration: 0.4
   shrinkingRing: {fileID: 958371737676142053}
-  mainSprite: {fileID: 502852689634035111}
-  valueText: {fileID: 3005387261073684136}
+  ringSpriteRenderer: {fileID: 6635454132293010485}

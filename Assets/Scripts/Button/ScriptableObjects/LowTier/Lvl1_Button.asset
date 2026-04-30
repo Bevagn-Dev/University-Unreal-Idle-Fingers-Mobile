@@ -15,4 +15,4 @@ MonoBehaviour:
   type: 0
   baseTapRewardAmount: 1
   lifeTimeSeconds: 2
-  color: {r: 1, g: 0.6656064, b: 0, a: 1}
+  color: {r: 1, g: 0.6666667, b: 0, a: 1}

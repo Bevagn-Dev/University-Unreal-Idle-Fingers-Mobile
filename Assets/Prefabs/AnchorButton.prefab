@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1321542894915638719}
   - component: {fileID: 7188304556026769948}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Progress
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -288,7 +288,7 @@ GameObject:
   - component: {fileID: 502852689634035111}
   - component: {fileID: 4470459409421314302}
   - component: {fileID: 6595597234370425985}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: AnchorButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}

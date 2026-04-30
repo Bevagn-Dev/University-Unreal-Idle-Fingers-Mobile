@@ -10,6 +10,8 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     public float timeToComplete = 2f;
     public float baseRewardAmount = 10f;
 
+    [Space(10)]
+
     [Header("References")]
     public SpriteRenderer progressBarSpriteRenderer;
 
@@ -36,7 +38,6 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     }
 
 
-    // Update is called once per frame
     void Update()
     {
         if (isHeld)
