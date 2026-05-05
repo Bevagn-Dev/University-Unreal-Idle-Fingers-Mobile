@@ -60,8 +60,6 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         transform.DOKill();
 
         transform.DOScale(originalScale * 0.85f, 0.15f).SetEase(Ease.OutQuad);
-
-        print("Down");
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -71,8 +69,6 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
         SetRadialProgress(0f);
         TriggerReleaseAnimation();
-
-        print("UP");
     }
 
     private void CompleteHold()
