@@ -418,3 +418,5 @@ MonoBehaviour:
   timeToComplete: 2
   baseRewardAmount: 10
   progressBarSpriteRenderer: {fileID: 7188304556026769948}
+  holdSFX: {fileID: 8300000, guid: ea80f7294d952e64b8286427c907c64a, type: 3}
+  releaseSFX: {fileID: 8300000, guid: 4d9215e6b3ddbc64ba753d0cf3a330f9, type: 3}

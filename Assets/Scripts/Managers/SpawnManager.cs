@@ -9,13 +9,16 @@ public class SpawnManager : MonoBehaviour
     public ButtonValues[] rarityPool; 
 
     [Header("Stats")]
-    public float spawnInterval = 1.5f;
-    public int maxButtonsOnScreen = 5;
+    [SerializeField] private float spawnInterval = 1.5f;
+    [SerializeField] private int maxButtonsOnScreen = 5;
     
-    public float safeSpawnRadius = 1.5f; 
+    [SerializeField] private float safeSpawnRadius = 1.5f; 
     
     [Header("Collision Layers")]
-    public LayerMask buttonLayerMask;
+    [SerializeField] private LayerMask buttonLayerMask;
+
+    [Header("Sounds")]
+    [SerializeField] private AudioClip[] spawnSFX;
 
     private float spawnTimer = 0f;
     private int currentActiveButtons = 0;
@@ -43,7 +46,6 @@ public class SpawnManager : MonoBehaviour
     {
         if (currentActiveButtons >= maxButtonsOnScreen) 
         {
-            Debug.Log("Screen is full! Current count: " + currentActiveButtons);
             return;
         }
 
@@ -99,6 +101,8 @@ public class SpawnManager : MonoBehaviour
         
         GameObject newBtn = Instantiate(tapButtonPrefab, validSpawnPos, Quaternion.identity);
         GameplayButton btnScript = newBtn.GetComponent<GameplayButton>();
+
+        SoundManager.Instance.PlayRandomUISound(spawnSFX, 0.2f);
         
         btnScript.Initialize(chosenData);
         currentActiveButtons++;
@@ -107,6 +111,6 @@ public class SpawnManager : MonoBehaviour
     public void ReportButtonDestroyed()
     {
         currentActiveButtons--;
-        if (currentActiveButtons < 0) currentActiveButtons = 0; 
+        if (currentActiveButtons < 0) currentActiveButtons = 0;
     }
 }

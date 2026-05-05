@@ -6,15 +6,18 @@ using DG.Tweening;
 
 public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    [Header("Stats")]
-    public float timeToComplete = 2f;
-    public float baseRewardAmount = 10f;
+    [Header("Hold Values")]
+    [SerializeField] private float timeToComplete = 2f;
+    [SerializeField] private float baseRewardAmount = 10f;
 
     [Space(10)]
 
     [Header("References")]
-    public SpriteRenderer progressBarSpriteRenderer;
+    [SerializeField] private SpriteRenderer progressBarSpriteRenderer;
 
+    [Header("Sounds")]
+    [SerializeField] private AudioClip holdSFX;
+    [SerializeField] private AudioClip releaseSFX;
 
     private SpriteRenderer spriteRenderer;
     private Material progressMaterial;
@@ -57,8 +60,9 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     {
         isHeld = true;
 
-        transform.DOKill();
+        SoundManager.Instance.PlayUISound(holdSFX, 1f);
 
+        transform.DOKill();
         transform.DOScale(originalScale * 0.85f, 0.15f).SetEase(Ease.OutQuad);
     }
 
@@ -66,6 +70,8 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     {
         isHeld = false;
         currentHoldTime = 0f;
+
+        SoundManager.Instance.PlayUISound(releaseSFX, 1f);
 
         SetRadialProgress(0f);
         TriggerReleaseAnimation();

@@ -418,3 +418,4 @@ MonoBehaviour:
   fadeDuration: 0.4
   shrinkingRing: {fileID: 958371737676142053}
   ringSpriteRenderer: {fileID: 6635454132293010485}
+  tapSFX: {fileID: 8300000, guid: 0a2db4118eba643498a1ca9e144ee003, type: 3}

@@ -7,13 +7,16 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
 {
 
     [Header("Visuals")]
-    public float fadeDuration = 0.2f;
+    [SerializeField] private float fadeDuration = 0.2f;
 
     [Space(10)]
 
     [Header("References")]
-    public Transform shrinkingRing;
-    public SpriteRenderer ringSpriteRenderer; 
+    [SerializeField] private Transform shrinkingRing;
+    [SerializeField] private SpriteRenderer ringSpriteRenderer; 
+
+    [Header("Sounds")]
+    [SerializeField] private AudioClip tapSFX;
 
     private SpriteRenderer spriteRenderer;
     private TMP_Text rewardText;
@@ -70,6 +73,8 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
     public void ExecuteTap() 
     {
         isInteractable = false;
+
+        SoundManager.Instance.PlayUISound(tapSFX, 1f);
         
         shrinkingRing.DOKill();
         transform.DOKill();
