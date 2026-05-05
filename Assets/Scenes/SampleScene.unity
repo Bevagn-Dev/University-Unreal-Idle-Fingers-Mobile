@@ -198,8 +198,9 @@ MonoBehaviour:
   tapButtonPrefab: {fileID: 9192987809197742904, guid: 4a22e5429b6cdb442a73fa60eafcd442, type: 3}
   rarityPool:
   - {fileID: 11400000, guid: 43267da4a7fe49f499ea83b702005286, type: 2}
+  - {fileID: 11400000, guid: 4ea3cefef6be31048bb30b97a5849f12, type: 2}
   spawnInterval: 3
-  maxButtonsOnScreen: 2
+  maxButtonsOnScreen: 1
   safeSpawnRadius: 0.5
   buttonLayerMask:
     serializedVersion: 2
@@ -506,6 +507,10 @@ PrefabInstance:
     - target: {fileID: 9192987809197742904, guid: 9c1e66f391062e848bf2c00a3c593a96, type: 3}
       propertyPath: m_Layer
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 9192987809197742904, guid: 9c1e66f391062e848bf2c00a3c593a96, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

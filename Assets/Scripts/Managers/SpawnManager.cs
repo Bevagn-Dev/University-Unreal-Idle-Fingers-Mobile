@@ -15,7 +15,6 @@ public class SpawnManager : MonoBehaviour
     public float safeSpawnRadius = 1.5f; 
     
     [Header("Collision Layers")]
-    [Tooltip("Set this to the physics layer your Tap Buttons are on so it ignores the background/anchor.")]
     public LayerMask buttonLayerMask;
 
     private float spawnTimer = 0f;
@@ -93,7 +92,6 @@ public class SpawnManager : MonoBehaviour
         
         if (!positionFound) 
         {
-            Debug.LogWarning($"Failed to find an empty spawn spot after {maxAttempts} attempts! Is your safeSpawnRadius too big?");
             return;
         }
 
