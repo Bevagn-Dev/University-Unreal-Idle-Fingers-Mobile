@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -21,8 +22,7 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private AudioClip[] spawnSFX;
 
     private float spawnTimer = 0f;
-    private int currentActiveButtons = 0;
-
+    private List<GameplayButton> activeButtons = new List<GameplayButton>();
     private SpriteRenderer prefabSpriteRef;
 
     private void Awake()
@@ -44,7 +44,7 @@ public class SpawnManager : MonoBehaviour
 
     private void Update()
     {
-        if (currentActiveButtons >= maxButtonsOnScreen) 
+        if (activeButtons.Count >= maxButtonsOnScreen) 
         {
             return;
         }
@@ -97,20 +97,34 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        ButtonValues chosenData = rarityPool[Random.Range(0, rarityPool.Length)];
-        
-        GameObject newBtn = Instantiate(tapButtonPrefab, validSpawnPos, Quaternion.identity);
-        GameplayButton btnScript = newBtn.GetComponent<GameplayButton>();
+        GameObject newBtn = ObjectPoolManager.Instance.Spawn("TapButton", validSpawnPos, Quaternion.identity);
 
-        SoundManager.Instance.PlayRandomUISound(spawnSFX, 0.2f);
-        
-        btnScript.Initialize(chosenData);
-        currentActiveButtons++;
+        if(newBtn != null)
+        {
+            ButtonValues chosenData = rarityPool[Random.Range(0, rarityPool.Length)];
+            GameplayButton btnScript = newBtn.GetComponent<GameplayButton>();
+
+            SoundManager.Instance.PlayRandomUISound(spawnSFX, 0.2f);
+            
+            btnScript.Initialize(chosenData);
+            activeButtons.Add(btnScript);
+        }
     }
 
-    public void ReportButtonDestroyed()
+    public void ReportButtonDestroyed(GameplayButton button)
     {
-        currentActiveButtons--;
-        if (currentActiveButtons < 0) currentActiveButtons = 0;
+        if (activeButtons.Contains(button))
+        {
+            activeButtons.Remove(button);
+        }
+    }
+
+    public GameplayButton GetTargetButton()
+    {
+        if (activeButtons.Count > 0)
+        {
+            return activeButtons[0];
+        }
+        return null;
     }
 }

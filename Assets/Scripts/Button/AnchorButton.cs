@@ -19,6 +19,9 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     [SerializeField] private AudioClip holdSFX;
     [SerializeField] private AudioClip releaseSFX;
 
+    [Header("Floating Text Colors")]
+    [SerializeField] private Color scoreColor;
+
     private SpriteRenderer spriteRenderer;
     private Material progressMaterial;
     private TMP_Text rewardText;
@@ -26,7 +29,6 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     private bool isHeld = false;
     private float currentHoldTime = 0f;
-
 
     void Start()
     {
@@ -39,7 +41,6 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
         SetRadialProgress(0f);
     }
-
 
     void Update()
     {
@@ -79,8 +80,19 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     private void CompleteHold()
     {
-        GameManager.Instance.AddHoldCurrency(baseRewardAmount);
+        float finalReward = GameManager.Instance.CalculateFinalValue(baseRewardAmount, 1f);
+        GameManager.Instance.AddHoldCurrencyRaw(finalReward);
         
+        GameObject popup = ObjectPoolManager.Instance.Spawn("FloatingText", transform.position, Quaternion.identity);
+        if (popup != null)
+        {
+            FloatingText ftScript = popup.GetComponent<FloatingText>();
+            if (ftScript != null)
+            {
+                ftScript.SetupFloat($"+{finalReward}", scoreColor);
+            }
+        }
+
         isHeld = false;
         currentHoldTime = 0f;
 

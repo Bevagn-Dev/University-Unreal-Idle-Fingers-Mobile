@@ -416,6 +416,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fadeDuration: 0.4
+  perfectColor: {r: 1, g: 0.6298992, b: 0, a: 1}
+  goodColor: {r: 1, g: 0.37800938, b: 0, a: 1}
+  earlyColor: {r: 1, g: 0, b: 0.26087475, a: 1}
   shrinkingRing: {fileID: 958371737676142053}
   ringSpriteRenderer: {fileID: 6635454132293010485}
   tapSFX: {fileID: 8300000, guid: 0a2db4118eba643498a1ca9e144ee003, type: 3}

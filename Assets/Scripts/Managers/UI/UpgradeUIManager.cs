@@ -2,15 +2,55 @@ using UnityEngine;
 
 public class UpgradeUIManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static UpgradeUIManager Instance { get; private set; }
+
+    [Header("UI Panels")]
+    public GameObject holdPanel;
+    public GameObject pressPanel;
+    public GameObject comboPanel;
+    public GameObject autoPanel;
+
+    private void Awake()
     {
-        
+        if (Instance != null && Instance != this) 
+        {
+            Destroy(gameObject);
+        }
+        else 
+        {
+            Instance = this;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ShowHoldPanel()
     {
-        
+        CloseAllPanels();
+        holdPanel.SetActive(true);
+    }
+
+    public void ShowPressPanel()
+    {
+        CloseAllPanels();
+        pressPanel.SetActive(true);
+    }
+
+    public void ShowComboPanel()
+    {
+        CloseAllPanels();
+        comboPanel.SetActive(true);
+    }
+
+    public void ShowAutoPanel()
+    {
+        CloseAllPanels();
+        autoPanel.SetActive(true);
+    }
+
+    public void CloseAllPanels()
+    {
+        holdPanel.SetActive(false);
+        pressPanel.SetActive(false);
+        comboPanel.SetActive(false);
+        autoPanel.SetActive(false);
     }
 }

@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public TMP_Text comboText;
     public TMP_Text tapText;        
     public TMP_Text holdText;
+    public Slider batterySlider;
 
     [Space(10)]
 
@@ -20,12 +21,19 @@ public class GameManager : MonoBehaviour
 
     [Space(10)]
 
+    [Header("Battery System")]
+    public float maxBattery = 100f;
+    public float currentBattery = 100f;
+
+    [Space(10)]
+
     [Header("Combos/Multipliers")]
     public float baseUpgradeMultiplier = 1f;
-    public float comboMultiplier = 1f;
+    public float prestigeMultiplier = 1f;
     public float adBoostMultiplier = 1f;
 
     public event Action OnCurrenciesUpdated;
+    public event Action OnBatteryUpdated;
 
     private void Awake()
     {
@@ -38,39 +46,72 @@ public class GameManager : MonoBehaviour
             Instance = this;
         }
 
+        currentBattery = maxBattery;
         CalculateTotalMultiplier();
     }
 
     public float CalculateTotalMultiplier()
     {
-        float comboAmount = baseUpgradeMultiplier * comboMultiplier * adBoostMultiplier;
-        comboText.text = ($"{comboAmount}x");
+        float comboAmount = baseUpgradeMultiplier * prestigeMultiplier * adBoostMultiplier;
+        
+        if (comboText != null)
+        {
+            comboText.text = ($"{comboAmount}x");
+        }
 
         return comboAmount;
     }
 
-    public void AddHoldCurrency(float baseAmount)
+    public float CalculateFinalValue(float baseAmount, float localBonus = 1f)
     {
-        holdCurrency += (baseAmount * CalculateTotalMultiplier());
+        float calculatedAmount = baseAmount * localBonus * CalculateTotalMultiplier();
+        return Mathf.Round(calculatedAmount * 10f) / 10f; 
+    }
+
+    public void AddHoldCurrencyRaw(float finalAmount)
+    {
+        holdCurrency += finalAmount;
         OnCurrenciesUpdated?.Invoke();
-        holdText.text = holdCurrency.ToString();
+        
+        if (holdText != null)
+        {
+            holdText.text = holdCurrency.ToString();
+        }
     }
 
-    public void AddTapCurrency(float baseAmount)
+    public void AddTapCurrencyRaw(float finalAmount)
     {
-        tapCurrency += (baseAmount * CalculateTotalMultiplier());
+        tapCurrency += finalAmount;
         OnCurrenciesUpdated?.Invoke();
-        tapText.text = tapCurrency.ToString();
+        
+        if (tapText != null)
+        {
+            tapText.text = tapCurrency.ToString();
+        }
     }
 
-    public void RegisterComboHit()
+    public void RechargeBattery(float amount)
     {
-        comboMultiplier = Mathf.Min(comboMultiplier + 0.1f, 3f); 
+        currentBattery += amount;
+
+        if (currentBattery > maxBattery)
+        {
+            currentBattery = maxBattery;
+        }
+
+        OnBatteryUpdated?.Invoke();
     }
 
-    public void BreakCombo()
+    public void DrainBattery(float amount)
     {
-        comboMultiplier = 1f;
+        currentBattery -= amount;
+
+        if (currentBattery < 0)
+        {
+            currentBattery = 0;
+        }
+
+        OnBatteryUpdated?.Invoke();
     }
+
 }
-
