@@ -1,22 +1,23 @@
 using UnityEngine;
+using System.Collections.Generic;
+using System;
+
+[System.Serializable]
+public class WorkerInstance
+{
+    public float currentCharge = 100f;
+    public float actionTimer = 0f;
+}
 
 public class WorkerManager : MonoBehaviour
 {
     public static WorkerManager Instance { get; private set; }
 
-    [Header("Toggle")]
-    public bool workersEnabled = true;
+    public List<WorkerInstance> activeWorkers = new List<WorkerInstance>();
+    public float maxWorkerCharge = 100f;
+    public float rechargeCost = 10f; 
 
-    [Header("Worker Upgrades")]
-    public int workerCount = 1;
-    public float baseCooldown = 3.0f; 
-    
-    public float perfectChance = 0.05f; 
-    public float goodChance = 0.25f;    
-    
-    public float batteryDrainPerTap = 2.0f;
-
-    private float actionTimer = 0f;
+    public event Action OnWorkersChanged;
 
     private void Awake()
     {
@@ -24,48 +25,85 @@ public class WorkerManager : MonoBehaviour
         else Instance = this;
     }
 
+    private void Start()
+    {
+        UpgradeManager.Instance.OnUpgradePurchased += HandleUpgrades;
+        UpdateWorkerCount();
+    }
+
+    private void OnDestroy()
+    {
+        if (UpgradeManager.Instance != null)
+        {
+            UpgradeManager.Instance.OnUpgradePurchased -= HandleUpgrades;
+        }
+    }
+
+    private void HandleUpgrades(UpgradeData data)
+    {
+        if (data.upgradeID == "worker_count")
+        {
+            UpdateWorkerCount();
+        }
+    }
+
+    private void UpdateWorkerCount()
+    {
+        int targetCount = UpgradeManager.Instance.GetUpgradeLevel("worker_count");
+
+        while (activeWorkers.Count < targetCount)
+        {
+            activeWorkers.Add(new WorkerInstance());
+            OnWorkersChanged?.Invoke();
+        }
+    }
+
     private void Update()
     {
-        if (!workersEnabled || workerCount <= 0 || GameManager.Instance.currentBattery < batteryDrainPerTap) 
-        {
-            return;
-        }
+        if (activeWorkers.Count == 0) return;
 
-        actionTimer -= Time.deltaTime;
+        float workerSpeed = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_speed", 3.0f));
+        float drainAmount = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_efficiency", 5.0f));
+        float autoPower = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_power_mult", 1.0f));
 
-        if (actionTimer <= 0)
+        foreach (var worker in activeWorkers)
         {
-            PerformAutoTap();
-            actionTimer = baseCooldown / workerCount; 
+            if (worker.currentCharge < drainAmount) continue;
+
+            worker.actionTimer -= Time.deltaTime;
+
+            if (worker.actionTimer <= 0)
+            {
+                GameplayButton target = SpawnManager.Instance.GetTargetButton();
+                
+                if (target != null)
+                {
+                    target.ExecuteAutoTap(autoPower);
+                    worker.currentCharge -= drainAmount;
+                    worker.actionTimer = workerSpeed;
+                }
+            }
         }
     }
 
-    private void PerformAutoTap()
+    public void RechargeWorker(int index)
     {
-        GameplayButton target = SpawnManager.Instance.GetTargetButton();
-        
-        if (target != null)
+        if (index >= 0 && index < activeWorkers.Count)
         {
-            GameManager.Instance.DrainBattery(batteryDrainPerTap);
-            
-            float roll = Random.value;
-            float generatedBonus = 1.0f;
-
-            if (roll <= perfectChance) 
+            if (GameManager.Instance.holdCurrency >= rechargeCost)
             {
-                generatedBonus = 2.0f;
+                GameManager.Instance.SpendHoldCurrencyRaw(rechargeCost);
+                activeWorkers[index].currentCharge = maxWorkerCharge;
             }
-            else if (roll <= perfectChance + goodChance) 
-            {
-                generatedBonus = 1.2f;
-            }
-
-            target.ExecuteAutoTap(generatedBonus);
         }
     }
 
-    public void ToggleWorkers(bool state)
+    private UpgradeData GetUpgradeData(string id, float fallback)
     {
-        workersEnabled = state;
+        UpgradeData dummy = ScriptableObject.CreateInstance<UpgradeData>();
+        dummy.upgradeID = id;
+        dummy.baseValue = fallback;
+        dummy.valueIncrement = 0;
+        return dummy;
     }
 }

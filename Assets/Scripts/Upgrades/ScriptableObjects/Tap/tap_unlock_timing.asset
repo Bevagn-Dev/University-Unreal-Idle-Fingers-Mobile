@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f379abbae58ef3488a1806326d5b7a7, type: 3}
+  m_Name: tap_unlock_timing
+  m_EditorClassIdentifier: 
+  upgradeID: tap_unlock_timing
+  displayName: Unlock Timing Rings
+  category: 1
+  currencyType: 0
+  baseCost: 50
+  costMultiplier: 1
+  maxLevel: 1
+  baseValue: 0
+  valueIncrement: 1

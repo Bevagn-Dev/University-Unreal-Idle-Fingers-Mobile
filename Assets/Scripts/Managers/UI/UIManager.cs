@@ -35,18 +35,21 @@ public class UIManager : MonoBehaviour
         CloseAllPanels();
         HideHud();
         upgradesPanel.SetActive(true);
+        Time.timeScale = 0f;
     }
     public void ShowSettings()
     {
         CloseAllPanels();
         HideHud();
         settingsPanel.SetActive(true);
+        Time.timeScale = 0f;
     }
     public void ShowPrestige()
     {
         CloseAllPanels();
         HideHud();
         presigePanel.SetActive(true);
+        Time.timeScale = 0f;
     }
 
     public void ShowRewards()
@@ -54,6 +57,7 @@ public class UIManager : MonoBehaviour
         CloseAllPanels();
         HideHud();
         rewardsPanel.SetActive(true);
+        Time.timeScale = 0f;
     }
 
 
@@ -68,6 +72,8 @@ public class UIManager : MonoBehaviour
 
         bottomUI.SetActive(true);
         topUI.SetActive(true);
+
+        Time.timeScale = 1f;
     }
 
     private void HideHud()

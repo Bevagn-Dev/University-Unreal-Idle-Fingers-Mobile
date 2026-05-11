@@ -1,14 +1,19 @@
 using UnityEngine;
+using TMPro;
 
 public class UpgradeUIManager : MonoBehaviour
 {
     public static UpgradeUIManager Instance { get; private set; }
 
     [Header("UI Panels")]
-    public GameObject holdPanel;
-    public GameObject pressPanel;
-    public GameObject comboPanel;
-    public GameObject autoPanel;
+    [SerializeField] private GameObject anchorPanel;
+    [SerializeField] private GameObject tapPanel;
+    [SerializeField] private GameObject workersPanel;
+    [SerializeField] private TMP_Text panelTitles;
+
+    [Header("Currency Text")]
+    [SerializeField] private TMP_Text holdCurrencyText;
+    [SerializeField] private TMP_Text tapCurrencyText;
 
     private void Awake()
     {
@@ -22,35 +27,63 @@ public class UpgradeUIManager : MonoBehaviour
         }
     }
 
-    public void ShowHoldPanel()
+    void Start()
     {
-        CloseAllPanels();
-        holdPanel.SetActive(true);
+        UpdateCurrencyDisplay();
+        ShowAnchorPanel();
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnCurrenciesUpdated += UpdateCurrencyDisplay;
+        }    
     }
 
-    public void ShowPressPanel()
+    private void OnDestroy()
     {
-        CloseAllPanels();
-        pressPanel.SetActive(true);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnCurrenciesUpdated -= UpdateCurrencyDisplay;
+        }
     }
 
-    public void ShowComboPanel()
+    public void ShowAnchorPanel()
     {
         CloseAllPanels();
-        comboPanel.SetActive(true);
+        panelTitles.text = "Anchor Upgrades";
+        anchorPanel.SetActive(true);
     }
 
-    public void ShowAutoPanel()
+    public void ShowTapPanel()
     {
         CloseAllPanels();
-        autoPanel.SetActive(true);
+        panelTitles.text = "Tap Upgrades";
+        tapPanel.SetActive(true);
+    }
+
+    public void ShowWorkersPanel()
+    {
+        CloseAllPanels();
+        panelTitles.text = "Worker Upgrades";
+        workersPanel.SetActive(true);
     }
 
     public void CloseAllPanels()
     {
-        holdPanel.SetActive(false);
-        pressPanel.SetActive(false);
-        comboPanel.SetActive(false);
-        autoPanel.SetActive(false);
+        anchorPanel.SetActive(false);
+        tapPanel.SetActive(false);
+        workersPanel.SetActive(false);
+    }
+
+    private void UpdateCurrencyDisplay()
+    {
+        if (holdCurrencyText != null)
+        {
+            holdCurrencyText.text = GameManager.Instance.holdCurrency.ToString();
+        }
+
+        if (tapCurrencyText != null)
+        {
+            tapCurrencyText.text = GameManager.Instance.tapCurrency.ToString();
+        }
     }
 }

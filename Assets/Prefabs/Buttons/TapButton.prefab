@@ -187,7 +187,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 6
   m_SortAtRoot: 0
 --- !u!1 &6526161127792275320
 GameObject:
@@ -356,7 +356,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 4
-  m_Sprite: {fileID: 1945269359277807493, guid: 0103e43f7ab19bc489d14661a35cb9d3, type: 3}
+  m_Sprite: {fileID: -5033175344798714313, guid: 586c1172f481d9b4fb3b79003cd04c7e, type: 3}
   m_Color: {r: 1, g: 0.6666667, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -419,6 +419,7 @@ MonoBehaviour:
   perfectColor: {r: 1, g: 0.6298992, b: 0, a: 1}
   goodColor: {r: 1, g: 0.37800938, b: 0, a: 1}
   earlyColor: {r: 1, g: 0, b: 0.26087475, a: 1}
+  autoColor: {r: 0.7, g: 0.2, b: 0.8, a: 1}
   shrinkingRing: {fileID: 958371737676142053}
   ringSpriteRenderer: {fileID: 6635454132293010485}
   tapSFX: {fileID: 8300000, guid: 0a2db4118eba643498a1ca9e144ee003, type: 3}

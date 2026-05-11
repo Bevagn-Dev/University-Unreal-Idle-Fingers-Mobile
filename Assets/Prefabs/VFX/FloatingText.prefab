@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6055506670622453378}
   - component: {fileID: 6529161073344857402}
   - component: {fileID: 2722480822780267111}
+  - component: {fileID: 8859197748864738391}
   m_Layer: 0
   m_Name: FloatingText
   m_TagString: Untagged
@@ -192,3 +193,15 @@ MonoBehaviour:
   textComponent: {fileID: 6529161073344857402}
   floatDistance: 0.4
   floatDuration: 0.6
+--- !u!210 &8859197748864738391
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8386730573074096650}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 15
+  m_SortAtRoot: 0

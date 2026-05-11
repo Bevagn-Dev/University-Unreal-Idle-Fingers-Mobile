@@ -11,7 +11,6 @@ public class GameManager : MonoBehaviour
     public TMP_Text comboText;
     public TMP_Text tapText;        
     public TMP_Text holdText;
-    public Slider batterySlider;
 
     [Space(10)]
 
@@ -112,6 +111,44 @@ public class GameManager : MonoBehaviour
         }
 
         OnBatteryUpdated?.Invoke();
+    }
+
+    public bool CanAfford(float amount, bool useHoldCurrency)
+    {
+        if (useHoldCurrency)
+        {
+            return holdCurrency >= amount;
+        }
+        else
+        {
+            return tapCurrency >= amount;
+        }
+    }
+
+    public void SpendHoldCurrencyRaw(float amount)
+    {
+        holdCurrency -= amount;
+        if (holdCurrency < 0) holdCurrency = 0;
+        
+        OnCurrenciesUpdated?.Invoke();
+        
+        if (holdText != null)
+        {
+            holdText.text = holdCurrency.ToString();
+        }
+    }
+
+    public void SpendTapCurrencyRaw(float amount)
+    {
+        tapCurrency -= amount;
+        if (tapCurrency < 0) tapCurrency = 0;
+        
+        OnCurrenciesUpdated?.Invoke();
+        
+        if (tapText != null)
+        {
+            tapText.text = tapCurrency.ToString();
+        }
     }
 
 }
