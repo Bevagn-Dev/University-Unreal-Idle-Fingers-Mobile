@@ -6,9 +6,9 @@ using DG.Tweening;
 
 public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    [Header("Hold Values")]
-    [SerializeField] private float timeToComplete = 2f;
-    [SerializeField] private float baseRewardAmount = 10f;
+    [Header("Upgrades")]
+    [SerializeField] private UpgradeData baseRewardData;
+    [SerializeField] private UpgradeData fillSpeedData;
 
     [Space(10)]
 
@@ -37,22 +37,25 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         rewardText = GetComponentInChildren<TMP_Text>();
 
         originalScale = transform.localScale;
-        rewardText.text = ($"+{baseRewardAmount}");
 
         SetRadialProgress(0f);
     }
 
     void Update()
     {
+        float currentReward = UpgradeManager.Instance.GetUpgradeCurrentValue(baseRewardData);
+        rewardText.text = $"+{currentReward}";
+
         if (isHeld)
         {
+            float timeToComplete = UpgradeManager.Instance.GetUpgradeCurrentValue(fillSpeedData);
             currentHoldTime += Time.deltaTime;
 
             SetRadialProgress(currentHoldTime / timeToComplete);
 
             if (currentHoldTime >= timeToComplete)
             {
-                CompleteHold();
+                CompleteHold(currentReward);
             }
         }
     }
@@ -78,9 +81,9 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         TriggerReleaseAnimation();
     }
 
-    private void CompleteHold()
+    private void CompleteHold(float currentReward)
     {
-        float finalReward = GameManager.Instance.CalculateFinalValue(baseRewardAmount, 1f);
+        float finalReward = GameManager.Instance.CalculateFinalValue(currentReward, 1f);
         GameManager.Instance.AddHoldCurrencyRaw(finalReward);
         
         GameObject popup = ObjectPoolManager.Instance.Spawn("FloatingText", transform.position, Quaternion.identity);

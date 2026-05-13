@@ -42,8 +42,6 @@ public class AudioToggleButton : MonoBehaviour
         {
             SoundMixerManager.Instance.ToggleSFXVolume(isMuted);
         }
-        
-        // SoundManager.Instance.PlayUISound(clickSound); 
     }
 
     private void UpdateVisuals()
@@ -57,5 +55,11 @@ public class AudioToggleButton : MonoBehaviour
         {
             soundOffIcon.SetActive(isMuted);
         }
+    }
+
+    public void InitializeState(bool savedMuteState)
+    {
+        isMuted = savedMuteState;
+        UpdateVisuals();
     }
 }

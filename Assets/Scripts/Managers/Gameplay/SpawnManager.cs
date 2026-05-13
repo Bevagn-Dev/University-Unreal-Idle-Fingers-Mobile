@@ -7,15 +7,18 @@ public class SpawnManager : MonoBehaviour
 
     [Header("References")]
     public GameObject tapButtonPrefab;
-    public ButtonValues[] rarityPool; 
+    public RectTransform playAreaRect;
 
-    [Header("Stats")]
-    [SerializeField] private float spawnInterval = 1.5f;
-    [SerializeField] private int maxButtonsOnScreen = 5;
-    
-    [SerializeField] private float safeSpawnRadius = 1.5f; 
-    
+    [Header("Upgrade Data References")]
+    public UpgradeData unlockSpawnsData;
+    public UpgradeData unlockTimingData;
+    public UpgradeData spawnRateData;
+    public UpgradeData maxAmountData;
+    public UpgradeData buttonLifetimeData;
+    public UpgradeData baseRewardData;
+
     [Header("Collision Layers")]
+    [SerializeField] private float safeSpawnRadius = 1.5f; 
     [SerializeField] private LayerMask buttonLayerMask;
 
     [Header("Sounds")]
@@ -44,14 +47,23 @@ public class SpawnManager : MonoBehaviour
 
     private void Update()
     {
-        if (activeButtons.Count >= maxButtonsOnScreen) 
+        if (UpgradeManager.Instance.GetUpgradeLevel(unlockSpawnsData.upgradeID) == 0)
+        {
+            return;
+        }
+
+        int currentMaxButtons = (int)UpgradeManager.Instance.GetUpgradeCurrentValue(maxAmountData);
+
+        if (activeButtons.Count >= currentMaxButtons) 
         {
             return;
         }
 
         spawnTimer += Time.deltaTime;
         
-        if (spawnTimer >= spawnInterval)
+        float currentSpawnRate = UpgradeManager.Instance.GetUpgradeCurrentValue(spawnRateData);
+        
+        if (spawnTimer >= currentSpawnRate)
         {
             SpawnButton();
             spawnTimer = 0f;
@@ -60,9 +72,11 @@ public class SpawnManager : MonoBehaviour
 
     private void SpawnButton()
     {
-        Rect safeArea = Screen.safeArea;
-        Vector3 minWorld = Camera.main.ScreenToWorldPoint(new Vector3(safeArea.xMin, safeArea.yMin, 0));
-        Vector3 maxWorld = Camera.main.ScreenToWorldPoint(new Vector3(safeArea.xMax, safeArea.yMax, 0));
+        Vector3[] corners = new Vector3[4];
+        playAreaRect.GetWorldCorners(corners);
+
+        Vector3 minWorld = Camera.main.ScreenToWorldPoint(corners[0]);
+        Vector3 maxWorld = Camera.main.ScreenToWorldPoint(corners[2]);
 
         float paddingX = prefabSpriteRef.bounds.extents.x;
         float paddingY = prefabSpriteRef.bounds.extents.y;
@@ -101,12 +115,15 @@ public class SpawnManager : MonoBehaviour
 
         if(newBtn != null)
         {
-            ButtonValues chosenData = rarityPool[Random.Range(0, rarityPool.Length)];
             GameplayButton btnScript = newBtn.GetComponent<GameplayButton>();
 
             SoundManager.Instance.PlayRandomUISound(spawnSFX, 0.2f);
             
-            btnScript.Initialize(chosenData);
+            float reward = UpgradeManager.Instance.GetUpgradeCurrentValue(baseRewardData);
+            float lifetime = UpgradeManager.Instance.GetUpgradeCurrentValue(buttonLifetimeData);
+            bool timingUnlocked = UpgradeManager.Instance.GetUpgradeLevel(unlockTimingData.upgradeID) > 0;
+            
+            btnScript.Initialize(reward, lifetime, timingUnlocked);
             activeButtons.Add(btnScript);
         }
     }

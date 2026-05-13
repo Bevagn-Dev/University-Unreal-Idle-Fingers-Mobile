@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -31,6 +32,12 @@ public class GameManager : MonoBehaviour
     public float prestigeMultiplier = 1f;
     public float adBoostMultiplier = 1f;
 
+    [Space(10)]
+
+    [Header("Prestige Settings")]
+    public float prestigeThreshold = 10000f; 
+    public float prestigeScaling = 10000f;   
+
     public event Action OnCurrenciesUpdated;
     public event Action OnBatteryUpdated;
 
@@ -45,8 +52,35 @@ public class GameManager : MonoBehaviour
             Instance = this;
         }
 
+        prestigeMultiplier = PlayerPrefs.GetFloat("PrestigeMultiplier", 1f);
+        holdCurrency = PlayerPrefs.GetFloat("HoldCurrency", 0f);
+        tapCurrency = PlayerPrefs.GetFloat("TapCurrency", 0f);
+
+        if (holdText != null) holdText.text = holdCurrency.ToString();
+        if (tapText != null) tapText.text = tapCurrency.ToString();
+
         currentBattery = maxBattery;
         CalculateTotalMultiplier();
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            SaveCurrency();
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveCurrency();
+    }
+
+    private void SaveCurrency()
+    {
+        PlayerPrefs.SetFloat("HoldCurrency", holdCurrency);
+        PlayerPrefs.SetFloat("TapCurrency", tapCurrency);
+        PlayerPrefs.Save();
     }
 
     public float CalculateTotalMultiplier()
@@ -55,7 +89,7 @@ public class GameManager : MonoBehaviour
         
         if (comboText != null)
         {
-            comboText.text = ($"{comboAmount}x");
+            comboText.text = $"{comboAmount:F1}x";
         }
 
         return comboAmount;
@@ -151,4 +185,49 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public float GetPotentialPrestigeGain()
+    {
+        float totalMoney = holdCurrency + tapCurrency;
+        
+        if (totalMoney < prestigeThreshold) 
+        {
+            return 0f;
+        }
+
+        return Mathf.Floor(totalMoney / prestigeScaling) * 0.1f;
+    }
+
+    public void ExecutePrestige()
+    {
+        float potentialGain = GetPotentialPrestigeGain();
+        
+        if (potentialGain <= 0) 
+        {
+            return;
+        }
+
+        float newPrestige = prestigeMultiplier + potentialGain;
+
+        float masterVol = PlayerPrefs.GetFloat("MasterVol", 1f);
+        float musicVol = PlayerPrefs.GetFloat("MusicVol", 1f);
+        float sfxVol = PlayerPrefs.GetFloat("SFXVol", 1f);
+        int masterMute = PlayerPrefs.GetInt("MasterMute", 0);
+        int musicMute = PlayerPrefs.GetInt("MusicMute", 0);
+        int sfxMute = PlayerPrefs.GetInt("SFXMute", 0);
+
+        PlayerPrefs.DeleteAll();
+
+        PlayerPrefs.SetFloat("PrestigeMultiplier", newPrestige);
+        
+        PlayerPrefs.SetFloat("MasterVol", masterVol);
+        PlayerPrefs.SetFloat("MusicVol", musicVol);
+        PlayerPrefs.SetFloat("SFXVol", sfxVol);
+        PlayerPrefs.SetInt("MasterMute", masterMute);
+        PlayerPrefs.SetInt("MusicMute", musicMute);
+        PlayerPrefs.SetInt("SFXMute", sfxMute);
+
+        PlayerPrefs.Save();
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 }

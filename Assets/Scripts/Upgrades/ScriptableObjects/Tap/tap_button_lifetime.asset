@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1f379abbae58ef3488a1806326d5b7a7, type: 3}
-  m_Name: battery_max
+  m_Name: tap_button_lifetime
   m_EditorClassIdentifier: 
-  upgradeID: battery_max
-  displayName: Battery Size
-  category: 0
-  currencyType: 1
-  baseCost: 200
-  costMultiplier: 1.3
-  maxLevel: 50
-  baseValue: 100
-  valueIncrement: 50
+  upgradeID: button_lifetime
+  displayName: Button Lifetime
+  category: 1
+  currencyType: 0
+  baseCost: 75
+  costMultiplier: 1.2
+  maxLevel: 20
+  baseValue: 3
+  valueIncrement: 0.2

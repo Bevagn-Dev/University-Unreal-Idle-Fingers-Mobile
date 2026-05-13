@@ -415,9 +415,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f68d47c91f93eb4aaee9f5673d739a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeToComplete: 2
-  baseRewardAmount: 10
+  baseRewardData: {fileID: 11400000, guid: ee3630815863dc247bb6a2bb53527931, type: 2}
+  fillSpeedData: {fileID: 11400000, guid: 7d2d23b632fe2a64caf909ef7473b825, type: 2}
   progressBarSpriteRenderer: {fileID: 7188304556026769948}
   holdSFX: {fileID: 8300000, guid: ea80f7294d952e64b8286427c907c64a, type: 3}
   releaseSFX: {fileID: 8300000, guid: 4d9215e6b3ddbc64ba753d0cf3a330f9, type: 3}
-  scoreColor: {r: 0.14711843, g: 0.3490566, b: 0, a: 0}
+  scoreColor: {r: 0, g: 0, b: 0, a: 0}

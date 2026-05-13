@@ -1,4 +1,5 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
@@ -9,9 +10,12 @@ public class UIManager : MonoBehaviour
     public GameObject settingsPanel;
     public GameObject presigePanel;
     public GameObject rewardsPanel;
-    public GameObject fadePanel;
     public GameObject bottomUI;
     public GameObject topUI;
+
+    [Header("Fading")]
+    public CanvasGroup fadePanelGroup;
+    [SerializeField] private float fadeDuration = 0.25f;
 
     private void Awake()
     {
@@ -27,6 +31,9 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        fadePanelGroup.alpha = 0f;
+        fadePanelGroup.gameObject.SetActive(false);
+        
         CloseAllPanels();
     }
 
@@ -37,6 +44,7 @@ public class UIManager : MonoBehaviour
         upgradesPanel.SetActive(true);
         Time.timeScale = 0f;
     }
+
     public void ShowSettings()
     {
         CloseAllPanels();
@@ -44,6 +52,7 @@ public class UIManager : MonoBehaviour
         settingsPanel.SetActive(true);
         Time.timeScale = 0f;
     }
+
     public void ShowPrestige()
     {
         CloseAllPanels();
@@ -60,15 +69,18 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-
-
     public void CloseAllPanels()
     {
         upgradesPanel.SetActive(false);
         settingsPanel.SetActive(false);
         presigePanel.SetActive(false);
         rewardsPanel.SetActive(false);
-        fadePanel.SetActive(false);
+
+        fadePanelGroup.DOKill();
+        fadePanelGroup.DOFade(0f, fadeDuration).SetUpdate(true).OnComplete(() => 
+        {
+            fadePanelGroup.gameObject.SetActive(false);
+        });
 
         bottomUI.SetActive(true);
         topUI.SetActive(true);
@@ -78,7 +90,11 @@ public class UIManager : MonoBehaviour
 
     private void HideHud()
     {
-        fadePanel.SetActive(true);
+        fadePanelGroup.gameObject.SetActive(true);
+        
+        fadePanelGroup.DOKill();
+        fadePanelGroup.DOFade(1f, fadeDuration).SetUpdate(true);
+
         bottomUI.SetActive(false);
         topUI.SetActive(false);
     }

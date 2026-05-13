@@ -9,10 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4165db50ff4ab64588293be4195ebe7, type: 3}
-  m_Name: Lvl1_Button
+  m_Script: {fileID: 11500000, guid: 1f379abbae58ef3488a1806326d5b7a7, type: 3}
+  m_Name: tap_unlock_spawners
   m_EditorClassIdentifier: 
-  type: 0
-  baseTapRewardAmount: 1
-  lifeTimeSeconds: 2
-  color: {r: 1, g: 0.6666667, b: 0, a: 1}
+  upgradeID: tap_unlock_spawners
+  displayName: Unlock Tap Spawning
+  category: 1
+  currencyType: 0
+  baseCost: 25
+  costMultiplier: 1
+  maxLevel: 1
+  baseValue: 0
+  valueIncrement: 1
