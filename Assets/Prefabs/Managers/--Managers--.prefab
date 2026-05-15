@@ -47,7 +47,6 @@ MonoBehaviour:
   comboText: {fileID: 0}
   tapText: {fileID: 0}
   holdText: {fileID: 0}
-  batterySlider: {fileID: 0}
   holdCurrency: 0
   tapCurrency: 0
   maxBattery: 100
@@ -55,6 +54,8 @@ MonoBehaviour:
   baseUpgradeMultiplier: 1
   prestigeMultiplier: 1
   adBoostMultiplier: 1
+  prestigeThreshold: 10000
+  prestigeScaling: 10000
 --- !u!1 &1911348746813862845
 GameObject:
   m_ObjectHideFlags: 0
@@ -90,6 +91,7 @@ Transform:
   - {fileID: 2614829322184128126}
   - {fileID: 3264789914239286258}
   - {fileID: 3909738994347009938}
+  - {fileID: 6553131118522450244}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2870083261069471065
@@ -339,11 +341,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tapButtonPrefab: {fileID: 9192987809197742904, guid: 4a22e5429b6cdb442a73fa60eafcd442, type: 3}
-  rarityPool:
-  - {fileID: 11400000, guid: 43267da4a7fe49f499ea83b702005286, type: 2}
-  - {fileID: 11400000, guid: 4ea3cefef6be31048bb30b97a5849f12, type: 2}
-  spawnInterval: 3
-  maxButtonsOnScreen: 1
+  playAreaRect: {fileID: 0}
+  unlockSpawnsData: {fileID: 0}
+  unlockTimingData: {fileID: 0}
+  spawnRateData: {fileID: 0}
+  maxAmountData: {fileID: 0}
+  buttonLifetimeData: {fileID: 0}
+  baseRewardData: {fileID: 0}
   safeSpawnRadius: 0.5
   buttonLayerMask:
     serializedVersion: 2
@@ -352,6 +356,53 @@ MonoBehaviour:
   - {fileID: 8300000, guid: be397dd7639e9014381b634ddb82b66c, type: 3}
   - {fileID: 8300000, guid: 8e9dbcf6f52812446ae91576413a0942, type: 3}
   - {fileID: 8300000, guid: eeba6405f21042d45883472157fb3a53, type: 3}
+--- !u!1 &4528184988101156945
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6553131118522450244}
+  - component: {fileID: 8802033579222470026}
+  m_Layer: 0
+  m_Name: AdManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6553131118522450244
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4528184988101156945}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 315641980807268292}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8802033579222470026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4528184988101156945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 845a4c21c27df94449d8e01be9a744ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  androidGameId: 6115087
+  iOSGameId: 6115086
+  testMode: 1
 --- !u!1 &7373320886685990076
 GameObject:
   m_ObjectHideFlags: 0

@@ -62,7 +62,7 @@ public class WorkerManager : MonoBehaviour
     {
         if (activeWorkers.Count == 0) return;
 
-        float workerSpeed = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_speed", 3.0f));
+        float workerSpeed = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_speed", 3.0f)) * RewardBoostManager.Instance.workerBoostMultiplier;
         float drainAmount = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_efficiency", 5.0f));
         float autoPower = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_power_mult", 1.0f));
 

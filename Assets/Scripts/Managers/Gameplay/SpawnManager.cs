@@ -61,7 +61,7 @@ public class SpawnManager : MonoBehaviour
 
         spawnTimer += Time.deltaTime;
         
-        float currentSpawnRate = UpgradeManager.Instance.GetUpgradeCurrentValue(spawnRateData);
+        float currentSpawnRate = UpgradeManager.Instance.GetUpgradeCurrentValue(spawnRateData) * RewardBoostManager.Instance.spawnBoostMultiplier;  
         
         if (spawnTimer >= currentSpawnRate)
         {
