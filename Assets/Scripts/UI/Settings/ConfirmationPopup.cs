@@ -17,32 +17,28 @@ public class ConfirmationPopup : MonoBehaviour
     [Header("Animation")]
     [SerializeField] private float fadeDuration = 0.2f;
 
+    private UnityAction currentConfirmAction;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) 
         {
             Destroy(gameObject);
+            return;
         }
-        else 
-        {
-            Instance = this;
-        }
+        Instance = this;
 
         popupCanvasGroup.alpha = 0f;
         popupCanvasGroup.gameObject.SetActive(false);
+
+        confirmButton.onClick.AddListener(OnConfirmClicked);
+        cancelButton.onClick.AddListener(Hide);
     }
 
     public void Show(string title, UnityAction confirmAction)
     {
         titleText.text = title;
-
-        confirmButton.onClick.RemoveAllListeners();
-        cancelButton.onClick.RemoveAllListeners();
-
-        confirmButton.onClick.AddListener(confirmAction);
-        confirmButton.onClick.AddListener(Hide);
-
-        cancelButton.onClick.AddListener(Hide);
+        currentConfirmAction = confirmAction;
 
         if (UIManager.Instance != null)
         {
@@ -55,6 +51,12 @@ public class ConfirmationPopup : MonoBehaviour
         popupCanvasGroup.DOFade(1f, fadeDuration).SetUpdate(true); 
     }
 
+    private void OnConfirmClicked()
+    {
+        currentConfirmAction?.Invoke();
+        Hide();
+    }
+
     public void Hide()
     {
         popupCanvasGroup.DOKill();
@@ -62,7 +64,11 @@ public class ConfirmationPopup : MonoBehaviour
         {
             popupCanvasGroup.gameObject.SetActive(false);
             
-            if (UIManager.Instance != null && !UIManager.Instance.settingsPanel.activeSelf && !UIManager.Instance.upgradesPanel.activeSelf && !UIManager.Instance.presigePanel.activeSelf && !UIManager.Instance.rewardsPanel.activeSelf)
+            if (UIManager.Instance != null && 
+                !UIManager.Instance.settingsPanel.activeSelf && 
+                !UIManager.Instance.upgradesPanel.activeSelf && 
+                !UIManager.Instance.prestigePanel.activeSelf && 
+                !UIManager.Instance.rewardsPanel.activeSelf)
             {
                 UIManager.Instance.bottomUI.SetActive(true);
                 UIManager.Instance.topUI.SetActive(true);

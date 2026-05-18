@@ -1,34 +1,55 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Collections;
 
 [System.Serializable]
 public class WorkerInstance
 {
-    public float currentCharge = 100f;
-    public float actionTimer = 0f;
+    public float currentCharge;
 }
 
 public class WorkerManager : MonoBehaviour
 {
     public static WorkerManager Instance { get; private set; }
 
-    public List<WorkerInstance> activeWorkers = new List<WorkerInstance>();
-    public float maxWorkerCharge = 100f;
+    [Header("Upgrade Data References")]
+    [SerializeField] private UpgradeData workerCountData;
+    [SerializeField] private UpgradeData workerSpeedData;
+    [SerializeField] private UpgradeData workerEfficiencyData;
+    [SerializeField] private UpgradeData workerPowerData;
+
+    [Header("Worker Settings")]
+    public float maxWorkerCharge = 50f;
     public float rechargeCost = 10f; 
+
+    public List<WorkerInstance> activeWorkers = new List<WorkerInstance>();
+    
+    public IReadOnlyList<WorkerInstance> ActiveWorkers => activeWorkers;
+    public float MaxWorkerCharge => maxWorkerCharge;
+    public float RechargeCost => rechargeCost;
 
     public event Action OnWorkersChanged;
 
+    private int cachedTargetCount;
+    private float cachedWorkerSpeed;
+    private float cachedDrainAmount;
+    private float cachedAutoPower;
+
     private void Awake()
     {
-        if (Instance != null && Instance != this) Destroy(gameObject);
-        else Instance = this;
+        if (Instance != null && Instance != this) 
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
     }
 
     private void Start()
     {
         UpgradeManager.Instance.OnUpgradePurchased += HandleUpgrades;
-        UpdateWorkerCount();
+        RefreshUpgradeCache();
     }
 
     private void OnDestroy()
@@ -41,47 +62,50 @@ public class WorkerManager : MonoBehaviour
 
     private void HandleUpgrades(UpgradeData data)
     {
-        if (data.upgradeID == "worker_count")
-        {
-            UpdateWorkerCount();
-        }
+        RefreshUpgradeCache();
+    }
+
+    private void RefreshUpgradeCache()
+    {
+        cachedTargetCount = UpgradeManager.Instance.GetUpgradeLevel(workerCountData.upgradeID);
+        cachedWorkerSpeed = UpgradeManager.Instance.GetUpgradeCurrentValue(workerSpeedData) * RewardBoostManager.Instance.workerBoostMultiplier;
+        cachedDrainAmount = UpgradeManager.Instance.GetUpgradeCurrentValue(workerEfficiencyData);
+        cachedAutoPower = UpgradeManager.Instance.GetUpgradeCurrentValue(workerPowerData);
+
+        UpdateWorkerCount();
     }
 
     private void UpdateWorkerCount()
     {
-        int targetCount = UpgradeManager.Instance.GetUpgradeLevel("worker_count");
-
-        while (activeWorkers.Count < targetCount)
+        while (activeWorkers.Count < cachedTargetCount)
         {
-            activeWorkers.Add(new WorkerInstance());
+            WorkerInstance newWorker = new WorkerInstance();
+            newWorker.currentCharge = maxWorkerCharge;
+            activeWorkers.Add(newWorker);
+            
+            StartCoroutine(WorkerBehavior(newWorker));
             OnWorkersChanged?.Invoke();
         }
     }
 
-    private void Update()
+    private IEnumerator WorkerBehavior(WorkerInstance worker)
     {
-        if (activeWorkers.Count == 0) return;
-
-        float workerSpeed = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_speed", 3.0f)) * RewardBoostManager.Instance.workerBoostMultiplier;
-        float drainAmount = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_efficiency", 5.0f));
-        float autoPower = UpgradeManager.Instance.GetUpgradeCurrentValue(GetUpgradeData("worker_power_mult", 1.0f));
-
-        foreach (var worker in activeWorkers)
+        while (true)
         {
-            if (worker.currentCharge < drainAmount) continue;
+            yield return new WaitUntil(() => worker.currentCharge >= cachedDrainAmount);
 
-            worker.actionTimer -= Time.deltaTime;
-
-            if (worker.actionTimer <= 0)
+            GameplayButton target = SpawnManager.Instance.GetTargetButton();
+            
+            if (target != null)
             {
-                GameplayButton target = SpawnManager.Instance.GetTargetButton();
+                target.ExecuteAutoTap(cachedAutoPower);
+                worker.currentCharge -= cachedDrainAmount;
                 
-                if (target != null)
-                {
-                    target.ExecuteAutoTap(autoPower);
-                    worker.currentCharge -= drainAmount;
-                    worker.actionTimer = workerSpeed;
-                }
+                yield return new WaitForSeconds(cachedWorkerSpeed);
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.1f);
             }
         }
     }
@@ -96,14 +120,5 @@ public class WorkerManager : MonoBehaviour
                 activeWorkers[index].currentCharge = maxWorkerCharge;
             }
         }
-    }
-
-    private UpgradeData GetUpgradeData(string id, float fallback)
-    {
-        UpgradeData dummy = ScriptableObject.CreateInstance<UpgradeData>();
-        dummy.upgradeID = id;
-        dummy.baseValue = fallback;
-        dummy.valueIncrement = 0;
-        return dummy;
     }
 }

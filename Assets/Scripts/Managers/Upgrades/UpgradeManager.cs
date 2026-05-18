@@ -12,11 +12,9 @@ public class UpgradeManager : MonoBehaviour
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
-        else
-        {
-            Instance = this;
-        }
+        Instance = this;
     }
 
     public int GetUpgradeLevel(string upgradeID)
@@ -41,28 +39,19 @@ public class UpgradeManager : MonoBehaviour
     {
         int currentLevel = GetUpgradeLevel(data.upgradeID);
 
-        if (currentLevel >= data.maxLevel)
-        {
-            return;
-        }
+        if (currentLevel >= data.maxLevel) return;
 
         float cost = GetUpgradeCost(data);
 
-        if (data.currencyType == CurrencyType.Hold)
+        if (data.currencyType == CurrencyType.Hold && GameManager.Instance.holdCurrency >= cost)
         {
-            if (GameManager.Instance.holdCurrency >= cost)
-            {
-                GameManager.Instance.SpendHoldCurrencyRaw(cost);
-                CompletePurchase(data, currentLevel);
-            }
+            GameManager.Instance.SpendHoldCurrencyRaw(cost);
+            CompletePurchase(data, currentLevel);
         }
-        else
+        else if (data.currencyType != CurrencyType.Hold && GameManager.Instance.tapCurrency >= cost)
         {
-            if (GameManager.Instance.tapCurrency >= cost)
-            {
-                GameManager.Instance.SpendTapCurrencyRaw(cost);
-                CompletePurchase(data, currentLevel);
-            }
+            GameManager.Instance.SpendTapCurrencyRaw(cost);
+            CompletePurchase(data, currentLevel);
         }
     }
 

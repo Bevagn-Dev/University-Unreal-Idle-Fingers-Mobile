@@ -20,11 +20,9 @@ public class SoundMixerManager : MonoBehaviour
         if (Instance != null && Instance != this) 
         {
             Destroy(gameObject);
+            return;
         }
-        else 
-        {
-            Instance = this;
-        }
+        Instance = this;
     }
 
     private void Start()
@@ -54,7 +52,7 @@ public class SoundMixerManager : MonoBehaviour
         
         if (!isMasterMuted)
         {
-            audioMixer.SetFloat("MasterVolume", Mathf.Log10(level) * 20f);
+            audioMixer.SetFloat("MasterVolume", Mathf.Log10(Mathf.Max(0.0001f, level)) * 20f);
         }
     }
 
@@ -65,7 +63,7 @@ public class SoundMixerManager : MonoBehaviour
         
         if (!isMusicMuted)
         {
-            audioMixer.SetFloat("MusicVolume", Mathf.Log10(level) * 20f);
+            audioMixer.SetFloat("MusicVolume", Mathf.Log10(Mathf.Max(0.0001f, level)) * 20f);
         }
     }
 
@@ -76,7 +74,7 @@ public class SoundMixerManager : MonoBehaviour
         
         if (!isSFXMuted)
         {
-            audioMixer.SetFloat("SFXVolume", Mathf.Log10(level) * 20f);
+            audioMixer.SetFloat("SFXVolume", Mathf.Log10(Mathf.Max(0.0001f, level)) * 20f);
         }
     }
 

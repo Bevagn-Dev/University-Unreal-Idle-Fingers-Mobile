@@ -20,14 +20,12 @@ public class UpgradeUIManager : MonoBehaviour
         if (Instance != null && Instance != this) 
         {
             Destroy(gameObject);
+            return;
         }
-        else 
-        {
-            Instance = this;
-        }
+        Instance = this;
     }
 
-    void Start()
+    private void Start()
     {
         UpdateCurrencyDisplay();
         ShowAnchorPanel();
@@ -48,23 +46,24 @@ public class UpgradeUIManager : MonoBehaviour
 
     public void ShowAnchorPanel()
     {
-        CloseAllPanels();
-        panelTitles.text = "Anchor Upgrades";
-        anchorPanel.SetActive(true);
+        OpenPanel(anchorPanel, "Anchor Upgrades");
     }
 
     public void ShowTapPanel()
     {
-        CloseAllPanels();
-        panelTitles.text = "Tap Upgrades";
-        tapPanel.SetActive(true);
+        OpenPanel(tapPanel, "Tap Upgrades");
     }
 
     public void ShowWorkersPanel()
     {
+        OpenPanel(workersPanel, "Worker Upgrades");
+    }
+
+    private void OpenPanel(GameObject panel, string title)
+    {
         CloseAllPanels();
-        panelTitles.text = "Worker Upgrades";
-        workersPanel.SetActive(true);
+        panelTitles.text = title;
+        panel.SetActive(true);
     }
 
     public void CloseAllPanels()

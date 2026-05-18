@@ -14,17 +14,16 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField] private AudioToggleButton musicMuteToggle;
     [SerializeField] private AudioToggleButton sfxMuteToggle;
 
-    public void HardResetGame()
+    private void Awake()
     {
-        ConfirmationPopup.Instance.Show("Erase Save Data?", ExecuteHardReset);
-    }
-
-    private void ExecuteHardReset()
-    {
-        PlayerPrefs.DeleteAll();
-        PlayerPrefs.Save();
-
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (masterSlider != null) 
+            masterSlider.onValueChanged.AddListener(val => SoundMixerManager.Instance.SetMasterVolume(val));
+            
+        if (musicSlider != null) 
+            musicSlider.onValueChanged.AddListener(val => SoundMixerManager.Instance.SetMusicVolume(val));
+            
+        if (sfxSlider != null) 
+            sfxSlider.onValueChanged.AddListener(val => SoundMixerManager.Instance.SetSFXVolume(val));
     }
 
     private void OnEnable()
@@ -58,5 +57,18 @@ public class SettingsMenu : MonoBehaviour
         {
             sfxMuteToggle.InitializeState(PlayerPrefs.GetInt("SFXMute", 0) == 1);
         }
+    }
+
+    public void HardResetGame()
+    {
+        ConfirmationPopup.Instance.Show("Erase Save Data?", ExecuteHardReset);
+    }
+
+    private void ExecuteHardReset()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

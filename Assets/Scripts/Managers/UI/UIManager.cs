@@ -6,15 +6,15 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
 
     [Header("UI Panels")]
-    public GameObject upgradesPanel;
-    public GameObject settingsPanel;
-    public GameObject presigePanel;
-    public GameObject rewardsPanel;
-    public GameObject bottomUI;
+    public  GameObject upgradesPanel;
+    public  GameObject settingsPanel;
+    public  GameObject prestigePanel;
+    public  GameObject rewardsPanel;
+    public  GameObject bottomUI;
     public GameObject topUI;
 
     [Header("Fading")]
-    public CanvasGroup fadePanelGroup;
+    [SerializeField] private CanvasGroup fadePanelGroup;
     [SerializeField] private float fadeDuration = 0.25f;
 
     private void Awake()
@@ -22,11 +22,9 @@ public class UIManager : MonoBehaviour
         if (Instance != null && Instance != this) 
         {
             Destroy(gameObject);
+            return;
         }
-        else 
-        {
-            Instance = this;
-        }
+        Instance = this;
     }
 
     private void Start()
@@ -39,33 +37,33 @@ public class UIManager : MonoBehaviour
 
     public void ShowUpgrades()
     {
-        CloseAllPanels();
-        HideHud();
-        upgradesPanel.SetActive(true);
-        Time.timeScale = 0f;
+        OpenPanel(upgradesPanel);
     }
 
     public void ShowSettings()
     {
-        CloseAllPanels();
-        HideHud();
-        settingsPanel.SetActive(true);
-        Time.timeScale = 0f;
+        OpenPanel(settingsPanel);
     }
 
     public void ShowPrestige()
     {
-        CloseAllPanels();
-        HideHud();
-        presigePanel.SetActive(true);
-        Time.timeScale = 0f;
+        OpenPanel(prestigePanel);
     }
 
     public void ShowRewards()
     {
-        CloseAllPanels();
+        OpenPanel(rewardsPanel);
+    }
+
+    private void OpenPanel(GameObject panel)
+    {
+        upgradesPanel.SetActive(false);
+        settingsPanel.SetActive(false);
+        prestigePanel.SetActive(false);
+        rewardsPanel.SetActive(false);
+
+        panel.SetActive(true);
         HideHud();
-        rewardsPanel.SetActive(true);
         Time.timeScale = 0f;
     }
 
@@ -73,7 +71,7 @@ public class UIManager : MonoBehaviour
     {
         upgradesPanel.SetActive(false);
         settingsPanel.SetActive(false);
-        presigePanel.SetActive(false);
+        prestigePanel.SetActive(false);
         rewardsPanel.SetActive(false);
 
         fadePanelGroup.DOKill();

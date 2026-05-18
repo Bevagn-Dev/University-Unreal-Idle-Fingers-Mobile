@@ -7,32 +7,45 @@ public class PrestigeUIManager : MonoBehaviour
     [Header("Text Elements")]
     [SerializeField] private TMP_Text currentMultiplierText;
     [SerializeField] private TMP_Text potentialGainText;
+    [SerializeField] private TMP_Text currentText;
     [SerializeField] private TMP_Text requirementText;
 
     [Header("Buttons")]
     [SerializeField] private Button prestigeButton;
 
-    private void OnEnable()
+    private void Awake()
     {
-        UpdatePrestigeUI();
+        prestigeButton.onClick.AddListener(OnPrestigeButtonClicked);
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        UpdatePrestigeUI();
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnCurrenciesUpdated += UpdatePrestigeUI;
+            UpdatePrestigeUI();
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnCurrenciesUpdated -= UpdatePrestigeUI;
+        }
     }
 
     private void UpdatePrestigeUI()
     {
-        if (GameManager.Instance == null) return;
-
         float currentMulti = GameManager.Instance.prestigeMultiplier;
         float potentialGain = GameManager.Instance.GetPotentialPrestigeGain();
         float combinedWealth = GameManager.Instance.holdCurrency + GameManager.Instance.tapCurrency;
+        float threshold = GameManager.Instance.prestigeThreshold;
 
         currentMultiplierText.text = $"Current Bonus: {currentMulti:F1}x";
+        currentText.text = $"Current Combined Currency: {combinedWealth}";
 
-        if (combinedWealth >= GameManager.Instance.prestigeThreshold)
+        if (combinedWealth >= threshold)
         {
             potentialGainText.text = $"Gain on Reset: +{potentialGain:F1}x";
             requirementText.text = "You are ready to Prestige!";
@@ -41,12 +54,9 @@ public class PrestigeUIManager : MonoBehaviour
         else
         {
             potentialGainText.text = "Gain on Reset: +0.0x";
-            requirementText.text = $"Requires {GameManager.Instance.prestigeThreshold} combined currency.";
+            requirementText.text = $"Requires {threshold} combined currency.";
             prestigeButton.interactable = false;
         }
-
-        prestigeButton.onClick.RemoveAllListeners();
-        prestigeButton.onClick.AddListener(OnPrestigeButtonClicked);
     }
 
     private void OnPrestigeButtonClicked()

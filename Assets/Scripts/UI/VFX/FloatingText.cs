@@ -4,11 +4,11 @@ using DG.Tweening;
 
 public class FloatingText : MonoBehaviour
 {
-    public TMP_Text textComponent; 
+    [SerializeField] private TMP_Text textComponent; 
 
     [Header("Animation Tweaks")]
-    public float floatDistance = 0.6f; 
-    public float floatDuration = 0.8f; 
+    [SerializeField] private float floatDistance = 0.6f; 
+    [SerializeField] private float floatDuration = 0.8f; 
 
     public void SetupFloat(string message, Color textColor)
     {
@@ -24,7 +24,6 @@ public class FloatingText : MonoBehaviour
         transform.localScale = Vector3.one * 0.4f; 
 
         transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
-
         transform.DOMoveY(transform.position.y + floatDistance, floatDuration).SetEase(Ease.OutQuint);
 
         float halfTime = floatDuration / 2f;

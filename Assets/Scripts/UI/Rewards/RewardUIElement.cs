@@ -1,51 +1,101 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class RewardUIElement : MonoBehaviour
 {
     [Header("Configuration")]
-    public BoostType boostType;
-    public string defaultText = "Temp Boost";
+    [SerializeField] private BoostType boostType;
+    [SerializeField] private string defaultText = "Temp Boost";
 
     [Header("References")]
     [SerializeField] private Button adButton;
     [SerializeField] private TMP_Text buttonText;
 
-    private void Start()
+    private Coroutine uiUpdateRoutine;
+    private int lastRecordedSecond = -1;
+    private int currentState = -1; 
+
+    private void Awake()
     {
         adButton.onClick.AddListener(OnButtonClicked);
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        if (RewardBoostManager.Instance == null) return;
+        if (uiUpdateRoutine != null) StopCoroutine(uiUpdateRoutine);
+        uiUpdateRoutine = StartCoroutine(UpdateUIRoutine());
+    }
 
-        bool isActive = RewardBoostManager.Instance.IsBoostActive(boostType);
-        bool isCooldown = RewardBoostManager.Instance.IsBoostOnCooldown(boostType);
+    private void OnDisable()
+    {
+        if (uiUpdateRoutine != null)
+        {
+            StopCoroutine(uiUpdateRoutine);
+            uiUpdateRoutine = null;
+        }
+    }
 
-        if (isActive)
+    private IEnumerator UpdateUIRoutine()
+    {
+        WaitForSeconds waitDelay = new WaitForSeconds(0.2f);
+
+        while (true)
         {
-            float time = RewardBoostManager.Instance.GetActiveTime(boostType);
-            buttonText.text = $"Active: {FormatTime(time)}";
-            adButton.interactable = false;
-        }
-        else if (isCooldown)
-        {
-            float time = RewardBoostManager.Instance.GetCooldownTime(boostType);
-            buttonText.text = $"Wait: {FormatTime(time)}";
-            adButton.interactable = false;
-        }
-        else
-        {
-            buttonText.text = defaultText;
-            adButton.interactable = true;
+            if (RewardBoostManager.Instance != null)
+            {
+                bool isActive = RewardBoostManager.Instance.IsBoostActive(boostType);
+                bool isCooldown = RewardBoostManager.Instance.IsBoostOnCooldown(boostType);
+
+                if (isActive)
+                {
+                    float time = RewardBoostManager.Instance.GetActiveTime(boostType);
+                    int currentSecond = Mathf.FloorToInt(time);
+                    
+                    if (currentSecond != lastRecordedSecond || currentState != 1)
+                    {
+                        buttonText.text = $"Active: {FormatTime(time)}";
+                        adButton.interactable = false;
+                        lastRecordedSecond = currentSecond;
+                        currentState = 1;
+                    }
+                }
+                else if (isCooldown)
+                {
+                    float time = RewardBoostManager.Instance.GetCooldownTime(boostType);
+                    int currentSecond = Mathf.FloorToInt(time);
+
+                    if (currentSecond != lastRecordedSecond || currentState != 2)
+                    {
+                        buttonText.text = $"Wait: {FormatTime(time)}";
+                        adButton.interactable = false;
+                        lastRecordedSecond = currentSecond;
+                        currentState = 2;
+                    }
+                }
+                else
+                {
+                    if (currentState != 0)
+                    {
+                        buttonText.text = defaultText;
+                        adButton.interactable = true;
+                        currentState = 0;
+                        lastRecordedSecond = -1;
+                    }
+                }
+            }
+            
+            yield return waitDelay;
         }
     }
 
     private void OnButtonClicked()
     {
-        AdManager.Instance.ShowAd(boostType.ToString());
+        if (AdManager.Instance != null)
+        {
+            AdManager.Instance.ShowAd(boostType);
+        }
     }
 
     private string FormatTime(float timeInSeconds)

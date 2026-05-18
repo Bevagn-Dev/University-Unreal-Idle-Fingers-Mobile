@@ -4,23 +4,26 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Button))]
 public class AudioToggleButton : MonoBehaviour
 {
-    [Header("Settings")]
-    public AudioTarget audioTarget;
     public enum AudioTarget { Master, Music, SFX }
 
+    [Header("Settings")]
+    [SerializeField] private AudioTarget audioTarget;
+
     [Header("Visuals")]
-    public GameObject soundOnIcon;  
-    public GameObject soundOffIcon; 
+    [SerializeField] private GameObject soundOnIcon;  
+    [SerializeField] private GameObject soundOffIcon; 
 
     private Button myButton;
     private bool isMuted = false; 
 
-    private void Start()
+    private void Awake()
     {
         myButton = GetComponent<Button>();
-        
-        myButton.onClick.AddListener(OnToggleClicked);
+    }
 
+    private void Start()
+    {
+        myButton.onClick.AddListener(OnToggleClicked);
         UpdateVisuals();
     }
 
@@ -30,17 +33,17 @@ public class AudioToggleButton : MonoBehaviour
 
         UpdateVisuals();
 
-        if (audioTarget == AudioTarget.Master)
+        switch (audioTarget)
         {
-            SoundMixerManager.Instance.ToggleMasterVolume(isMuted);
-        }
-        else if (audioTarget == AudioTarget.Music)
-        {
-            SoundMixerManager.Instance.ToggleMusicVolume(isMuted);
-        }
-        else if (audioTarget == AudioTarget.SFX)
-        {
-            SoundMixerManager.Instance.ToggleSFXVolume(isMuted);
+            case AudioTarget.Master:
+                SoundMixerManager.Instance.ToggleMasterVolume(isMuted);
+                break;
+            case AudioTarget.Music:
+                SoundMixerManager.Instance.ToggleMusicVolume(isMuted);
+                break;
+            case AudioTarget.SFX:
+                SoundMixerManager.Instance.ToggleSFXVolume(isMuted);
+                break;
         }
     }
 

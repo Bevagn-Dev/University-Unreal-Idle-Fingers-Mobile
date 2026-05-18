@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
 using DG.Tweening;
+using System.Collections;
 
 public class GameplayButton : MonoBehaviour, IPointerDownHandler
 {
@@ -30,13 +31,17 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
     private Vector3 originalScale;
 
     private float baseRewardAmount;
-    private float lifeTimer;
     private float maxLifeTime;
+    private float spawnTime;
     private bool isInteractable = true;
     private bool timingUnlocked = false;
 
+    private Coroutine lifetimeCoroutine;
+
     private void Awake()
     {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        rewardText = GetComponentInChildren<TMP_Text>();
         originalScale = transform.localScale;
     }
 
@@ -44,14 +49,11 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
     {
         baseRewardAmount = reward;
         maxLifeTime = lifetime;
-        lifeTimer = maxLifeTime;
         timingUnlocked = hasTimingUnlocked;
         
         isInteractable = true;
+        spawnTime = Time.time;
 
-        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
-        if (rewardText == null) rewardText = GetComponentInChildren<TMP_Text>();
-        
         transform.localScale = originalScale;
 
         Color spriteColor = spriteRenderer.color;
@@ -83,18 +85,15 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
         rewardText.color = txtColor;
 
         rewardText.text = baseRewardAmount.ToString();
+
+        if (lifetimeCoroutine != null) StopCoroutine(lifetimeCoroutine);
+        lifetimeCoroutine = StartCoroutine(LifetimeRoutine());
     }
 
-    void Update()
+    private IEnumerator LifetimeRoutine()
     {
-        if (!isInteractable) 
-        {
-            return;
-        }
-
-        lifeTimer -= Time.deltaTime;
-
-        if (lifeTimer <= 0)
+        yield return new WaitForSeconds(maxLifeTime);
+        if (isInteractable)
         {
             MissButton();
         }
@@ -102,10 +101,7 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!isInteractable) 
-        {
-            return;
-        }
+        if (!isInteractable) return;
 
         ExecuteTap();
     }
@@ -113,6 +109,7 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
     public void ExecuteTap() 
     {
         isInteractable = false;
+        if (lifetimeCoroutine != null) StopCoroutine(lifetimeCoroutine);
 
         SoundManager.Instance.PlayUISound(tapSFX, 1f);
         
@@ -141,27 +138,11 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
         float finalReward = GameManager.Instance.CalculateFinalValue(baseRewardAmount, timingBonus);
         GameManager.Instance.AddTapCurrencyRaw(finalReward);
 
-        GameObject rewardPopup = ObjectPoolManager.Instance.Spawn("FloatingText", transform.position, Quaternion.identity);
-        if (rewardPopup != null)
-        {
-            FloatingText ftScript = rewardPopup.GetComponent<FloatingText>();
-            if (ftScript != null)
-            {
-                ftScript.SetupFloat($"+{finalReward}", textColor);
-            }
-        }
+        SpawnFloatingText($"+{finalReward}", textColor);
 
         if (timingUnlocked && timingBonus >= 1.2f)
         {
-            GameObject qualityPopup = ObjectPoolManager.Instance.Spawn("FloatingText", transform.position, Quaternion.identity);
-            if (qualityPopup != null)
-            {
-                FloatingText ftScript = qualityPopup.GetComponent<FloatingText>();
-                if (ftScript != null)
-                {
-                    ftScript.SetupPulse(qualityText, textColor);
-                }
-            }
+            SpawnQualityText(qualityText, textColor);
         }
 
         transform.DOScale(originalScale * 0.85f, 0.1f).SetEase(Ease.OutQuad).OnComplete(FadeOutAndDestroy);
@@ -169,12 +150,10 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
 
     public void ExecuteAutoTap(float workerBonus)
     {
-        if (!isInteractable) 
-        {
-            return;
-        }
+        if (!isInteractable) return;
         
         isInteractable = false;
+        if (lifetimeCoroutine != null) StopCoroutine(lifetimeCoroutine);
 
         SoundManager.Instance.PlayUISound(tapSFX, 0.7f);
         
@@ -185,16 +164,7 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
         GameManager.Instance.AddTapCurrencyRaw(finalReward);
 
         ObjectPoolManager.Instance.Spawn("RedDot", transform.position, Quaternion.identity);
-
-        GameObject rewardPopup = ObjectPoolManager.Instance.Spawn("FloatingText", transform.position, Quaternion.identity);
-        if (rewardPopup != null)
-        {
-            FloatingText ftScript = rewardPopup.GetComponent<FloatingText>();
-            if (ftScript != null)
-            {
-                ftScript.SetupFloat($"Auto! +{finalReward}", autoColor);
-            }
-        }
+        SpawnFloatingText($"Auto! +{finalReward}", autoColor);
 
         transform.DOScale(originalScale * 0.85f, 0.1f).SetEase(Ease.OutQuad).OnComplete(FadeOutAndDestroy);
     }
@@ -206,7 +176,8 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
         shrinkingRing.DOKill();
         transform.DOKill();
         
-        transform.DOShakeScale(0.2f, 0.2f, 5, 45).OnComplete(FadeOutAndDestroy);
+        transform.DOScale(originalScale * 1.3f, fadeDuration).SetEase(Ease.OutQuad);
+        FadeOutAndDestroy();
     }
 
     private void FadeOutAndDestroy()
@@ -227,24 +198,34 @@ public class GameplayButton : MonoBehaviour, IPointerDownHandler
 
     private float CalculateTimingBonus()
     {
-        if (!timingUnlocked)
-        {
-            return 1.0f;
-        }
+        if (!timingUnlocked) return 1.0f;
 
-        float progress = 1f - (lifeTimer / maxLifeTime);
+        float elapsed = Time.time - spawnTime;
+        float progress = elapsed / maxLifeTime;
 
         if (progress >= 0.85f) 
         {
             return UpgradeManager.Instance.GetUpgradeLevel("tap_perfect_mult") > 0 ? 2.0f : 1.5f;
         }
-        if (progress >= 0.60f) 
+        
+        return progress >= 0.60f ? 1.2f : 1.0f;
+    }
+
+    private void SpawnFloatingText(string text, Color color)
+    {
+        GameObject popup = ObjectPoolManager.Instance.Spawn("FloatingText", transform.position, Quaternion.identity);
+        if (popup != null && popup.TryGetComponent(out FloatingText ftScript))
         {
-            return 1.2f;
+            ftScript.SetupFloat(text, color);
         }
-        else
+    }
+
+    private void SpawnQualityText(string text, Color color)
+    {
+        GameObject popup = ObjectPoolManager.Instance.Spawn("FloatingText", transform.position, Quaternion.identity);
+        if (popup != null && popup.TryGetComponent(out FloatingText ftScript))
         {
-            return 1.0f;
+            ftScript.SetupPulse(text, color);
         }
     }
 }

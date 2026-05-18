@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class MusicManager : MonoBehaviour
 {
@@ -11,40 +12,38 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioClip[] playlist;
 
     private int lastPlayedIndex = -1;
+    private Coroutine playlistRoutine;
 
     private void Awake()
     {
         if (Instance != null && Instance != this) 
         {
             Destroy(gameObject);
+            return;
         }
-        else 
-        {
-            Instance = this;
-        }
+        Instance = this;
     }
 
     private void Start()
     {
-        if (musicSource != null)
+        if (musicSource != null && playlist != null && playlist.Length > 0)
         {
             musicSource.loop = false; 
-            PlayRandomSong();
+            playlistRoutine = StartCoroutine(PlaylistRoutine());
         }
     }
 
-    private void Update()
+    private IEnumerator PlaylistRoutine()
     {
-        if (musicSource != null && !musicSource.isPlaying && playlist.Length > 0)
+        while (true)
         {
             PlayRandomSong();
+            yield return new WaitForSecondsRealtime(musicSource.clip.length);
         }
     }
 
     private void PlayRandomSong()
     {
-        if (playlist == null || playlist.Length == 0) return;
-
         int randomIndex = Random.Range(0, playlist.Length);
 
         if (playlist.Length > 1)
@@ -59,6 +58,4 @@ public class MusicManager : MonoBehaviour
         musicSource.clip = playlist[randomIndex];
         musicSource.Play();
     }
-    
-
 }

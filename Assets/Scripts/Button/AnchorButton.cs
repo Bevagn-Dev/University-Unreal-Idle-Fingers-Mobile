@@ -12,6 +12,11 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     [Space(10)]
 
+    [Header("Spawn Boundaries")]
+    [SerializeField] private RectTransform playAreaRect;
+    [SerializeField] private float safeSpawnRadius = 1.5f; 
+    [SerializeField] private LayerMask buttonLayerMask;
+
     [Header("References")]
     [SerializeField] private SpriteRenderer progressBarSpriteRenderer;
 
@@ -25,44 +30,54 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     private SpriteRenderer spriteRenderer;
     private Material progressMaterial;
     private TMP_Text rewardText;
+    private Camera mainCamera; 
     private Vector3 originalScale;
 
     private bool isHeld = false;
     private float currentHoldTime = 0f;
 
-    void Start()
+    private float cachedRewardValue;
+    private float cachedTimeToComplete;
+    private float minX, maxX, minY, maxY;
+
+    private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        progressMaterial = progressBarSpriteRenderer.material;
         rewardText = GetComponentInChildren<TMP_Text>();
+        mainCamera = Camera.main; 
+    }
 
+    private void Start()
+    {
+        progressMaterial = progressBarSpriteRenderer.material;
         originalScale = transform.localScale;
 
         SetRadialProgress(0f);
+        UpdateRewardDisplay();
+        CalculateBoundaries();
     }
 
-    void Update()
+    private void Update()
     {
-        float currentReward = UpgradeManager.Instance.GetUpgradeCurrentValue(baseRewardData);
-        rewardText.text = $"+{currentReward}";
+        if (!isHeld) return;
 
-        if (isHeld)
+        currentHoldTime += Time.deltaTime;
+        SetRadialProgress(currentHoldTime / cachedTimeToComplete);
+
+        if (currentHoldTime >= cachedTimeToComplete)
         {
-            float timeToComplete = UpgradeManager.Instance.GetUpgradeCurrentValue(fillSpeedData);
-            currentHoldTime += Time.deltaTime;
-
-            SetRadialProgress(currentHoldTime / timeToComplete);
-
-            if (currentHoldTime >= timeToComplete)
-            {
-                CompleteHold(currentReward);
-            }
+            CompleteHold();
         }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         isHeld = true;
+
+        cachedRewardValue = UpgradeManager.Instance.GetUpgradeCurrentValue(baseRewardData);
+        cachedTimeToComplete = UpgradeManager.Instance.GetUpgradeCurrentValue(fillSpeedData);
+
+        UpdateRewardDisplay();
 
         SoundManager.Instance.PlayUISound(holdSFX, 1f);
 
@@ -72,18 +87,15 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        isHeld = false;
-        currentHoldTime = 0f;
+        ResetHoldState();
 
         SoundManager.Instance.PlayUISound(releaseSFX, 1f);
-
-        SetRadialProgress(0f);
         TriggerReleaseAnimation();
     }
 
-    private void CompleteHold(float currentReward)
+    private void CompleteHold()
     {
-        float finalReward = GameManager.Instance.CalculateFinalValue(currentReward, 1f);
+        float finalReward = GameManager.Instance.CalculateFinalValue(cachedRewardValue, 1f);
         GameManager.Instance.AddHoldCurrencyRaw(finalReward);
         
         GameObject popup = ObjectPoolManager.Instance.Spawn("FloatingText", transform.position, Quaternion.identity);
@@ -96,30 +108,65 @@ public class AnchorButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
             }
         }
 
-        isHeld = false;
-        currentHoldTime = 0f;
-
-        SetRadialProgress(0f);
+        ResetHoldState();
         TriggerReleaseAnimation();
         TeleportToNewLocation();
     }
 
-    private void TeleportToNewLocation()
+    private void ResetHoldState()
     {
-        Rect safeArea = Screen.safeArea;
+        isHeld = false;
+        currentHoldTime = 0f;
+        SetRadialProgress(0f);
+    }
 
-        Vector3 minWorld = Camera.main.ScreenToWorldPoint(new Vector3(safeArea.xMin, safeArea.yMin, 0));
-        Vector3 maxWorld = Camera.main.ScreenToWorldPoint(new Vector3(safeArea.xMax, safeArea.yMax, 0));
+    private void UpdateRewardDisplay()
+    {
+        float currentReward = UpgradeManager.Instance.GetUpgradeCurrentValue(baseRewardData);
+        rewardText.text = $"+{currentReward}";
+    }
+
+    private void CalculateBoundaries()
+    {
+        Vector3[] corners = new Vector3[4];
+        playAreaRect.GetWorldCorners(corners);
+
+        Vector3 minWorld = mainCamera.ScreenToWorldPoint(corners[0]);
+        Vector3 maxWorld = mainCamera.ScreenToWorldPoint(corners[2]);
 
         float paddingX = spriteRenderer.bounds.extents.x;
         float paddingY = spriteRenderer.bounds.extents.y;
 
-        float minX = minWorld.x + paddingX;
-        float maxX = maxWorld.x - paddingX;
-        float minY = minWorld.y + paddingY;
-        float maxY = maxWorld.y - paddingY;
+        minX = minWorld.x + paddingX;
+        maxX = maxWorld.x - paddingX;
+        minY = minWorld.y + paddingY;
+        maxY = maxWorld.y - paddingY;
+    }
 
-        transform.position = new Vector3(Random.Range(minX, maxX), Random.Range(minY, maxY), 0f);
+    private void TeleportToNewLocation()
+    {
+        Vector3 validSpawnPos = transform.position;
+        bool positionFound = false;
+        int maxAttempts = 15;
+
+        for (int i = 0; i < maxAttempts; i++)
+        {
+            Vector3 testPos = new Vector3(Random.Range(minX, maxX), Random.Range(minY, maxY), 0f);
+
+            Collider2D overlapHit = Physics2D.OverlapCircle(testPos, safeSpawnRadius, buttonLayerMask);
+            
+            if (overlapHit == null || overlapHit.gameObject == gameObject)
+            {
+                validSpawnPos = testPos;
+                positionFound = true;
+                break; 
+            }
+        }
+
+        if (positionFound)
+        {
+            transform.position = validSpawnPos;
+        }
     }
 
     private void SetRadialProgress(float progress)

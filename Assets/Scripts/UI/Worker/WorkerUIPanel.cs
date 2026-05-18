@@ -1,14 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class WorkerUIPanel : MonoBehaviour
 {
     [SerializeField] private GameObject workerSlotPrefab;
     [SerializeField] private Transform container;
 
+    private List<WorkerSlotUI> spawnedSlots = new List<WorkerSlotUI>();
+
     private void Start()
     {
-        WorkerManager.Instance.OnWorkersChanged += RefreshList;
-        RefreshList();
+        if (WorkerManager.Instance != null)
+        {
+            WorkerManager.Instance.OnWorkersChanged += RefreshList;
+            RefreshList();
+        }
     }
 
     private void OnDestroy()
@@ -21,20 +27,26 @@ public class WorkerUIPanel : MonoBehaviour
 
     private void RefreshList()
     {
-        foreach (Transform child in container)
+        int targetCount = WorkerManager.Instance.ActiveWorkers.Count;
+
+        for (int i = 0; i < targetCount; i++)
         {
-            Destroy(child.gameObject);
+            if (i >= spawnedSlots.Count)
+            {
+                GameObject newSlot = Instantiate(workerSlotPrefab, container);
+                if (newSlot.TryGetComponent(out WorkerSlotUI slotScript))
+                {
+                    spawnedSlots.Add(slotScript);
+                }
+            }
+
+            spawnedSlots[i].gameObject.SetActive(true);
+            spawnedSlots[i].Setup(i);
         }
 
-        for (int i = 0; i < WorkerManager.Instance.activeWorkers.Count; i++)
+        for (int i = targetCount; i < spawnedSlots.Count; i++)
         {
-            GameObject newSlot = Instantiate(workerSlotPrefab, container);
-            WorkerSlotUI slotScript = newSlot.GetComponent<WorkerSlotUI>();
-            
-            if (slotScript != null)
-            {
-                slotScript.Setup(i);
-            }
+            spawnedSlots[i].gameObject.SetActive(false);
         }
     }
 }

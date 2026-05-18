@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class ObjectPoolManager : MonoBehaviour
 {
-public static ObjectPoolManager Instance { get; private set; }
+    public static ObjectPoolManager Instance { get; private set; }
 
     [System.Serializable]
     public class Pool
@@ -13,15 +13,28 @@ public static ObjectPoolManager Instance { get; private set; }
         public int size;
     }
 
-    public List<Pool> pools;
-    public Dictionary<string, Queue<GameObject>> poolDictionary;
+    [Header("Pool Configuration")]
+    [SerializeField] private List<Pool> pools;
+
+    private Dictionary<string, Queue<GameObject>> poolDictionary;
+    private Dictionary<string, GameObject> prefabLookup;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this) Destroy(gameObject);
-        else Instance = this;
+        if (Instance != null && Instance != this) 
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
 
+        InitializePools();
+    }
+
+    private void InitializePools()
+    {
         poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        prefabLookup = new Dictionary<string, GameObject>();
 
         foreach (Pool pool in pools)
         {
@@ -35,17 +48,17 @@ public static ObjectPoolManager Instance { get; private set; }
             }
 
             poolDictionary.Add(pool.tag, objectPool);
+            
+
+            prefabLookup.Add(pool.tag, pool.prefab);
         }
     }
 
     public GameObject Spawn(string tag, Vector3 position, Quaternion rotation)
     {
-        if (!poolDictionary.ContainsKey(tag))
-        {
-            return null;
-        }
+        if (!poolDictionary.ContainsKey(tag)) return null;
 
-        GameObject objectToSpawn = null;
+        GameObject objectToSpawn;
 
         if (poolDictionary[tag].Count > 0)
         {
@@ -53,22 +66,11 @@ public static ObjectPoolManager Instance { get; private set; }
         }
         else 
         {
-            foreach (Pool pool in pools)
-            {
-                if (pool.tag == tag)
-                {
-                    objectToSpawn = Instantiate(pool.prefab, transform);
-                    break;
-                }
-            }
+            objectToSpawn = Instantiate(prefabLookup[tag], transform);
         }
 
-        if (objectToSpawn != null)
-        {
-            objectToSpawn.SetActive(true);
-            objectToSpawn.transform.position = position;
-            objectToSpawn.transform.rotation = rotation;
-        }
+        objectToSpawn.transform.SetPositionAndRotation(position, rotation);
+        objectToSpawn.SetActive(true);
 
         return objectToSpawn;
     }
@@ -76,6 +78,7 @@ public static ObjectPoolManager Instance { get; private set; }
     public void Despawn(string tag, GameObject obj)
     {
         obj.SetActive(false);
+        
         if (poolDictionary.ContainsKey(tag))
         {
             poolDictionary[tag].Enqueue(obj);
